@@ -1,0 +1,81 @@
+
+name: CI_gemini_sql_summary
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+       
+      - name: compare
+        id: diff
+        run: | 
+          DIFF=$(git diff HEAD^ HEAD -- '**.sql') 
+          {
+           echo "sql_diff<<EOF"
+           echo "$DIFF"
+           echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: run Gemini CLI
+        # You may pin to the exact commit or the version.
+        # uses: google-github-actions/run-gemini-cli@68d5a6d2e31ff01029205c58c6bf81cb3d72910b
+        uses: google-github-actions/run-gemini-cli@v0.1.3
+        with:
+        # A string passed to the Gemini CLI's [`--prompt` argument](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md#command-line-arguments).
+          prompt: You are a Senior Data Engineer. Summarize the following SQL changes. Focus on table schema updates, new indexes, or logic changes in stored procedures. Put what you wrote in standard output. " >  "sql_file_summary.txt"
+          # A JSON string written to `.gemini/settings.json` to configure the CLI's _project_ settings.
+            Code Diff: 
+            ${{steps.diff.outputs.sql_diff }}
+          gemini_api_key: # optional
+      
+          settings: # optional
+          # The API key for the Gemini API.
+          gemini_api_key: # optional
+          # The Google Cloud project ID.
+          gcp_project_id: # optional
+          # The Google Cloud location.
+          gcp_location: # optional
+          # The Google Cloud Workload Identity Provider.
+          gcp_workload_identity_provider: # optional
+          # The Google Cloud service account email.
+          gcp_service_account: # optional
+          # A flag to indicate if Vertex AI should be used.
+          use_vertex_ai: # optional, default is false
+          # A flag to indicate if Gemini Code Assist should be used.
+          use_gemini_code_assist: # optional, default is false
+          # The version of the Gemini CLI to install.
+          gemini_cli_version: # optional, default is latest
+
+        push summary:
+         git add summary.txt
+         git commit -m "created a new summary file for sql code that was recently pushed"
+         git push origin main
+       
+       
+       
+     
+          
