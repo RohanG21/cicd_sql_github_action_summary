@@ -70,10 +70,11 @@ jobs:
           # The version of the Gemini CLI to install.
           gemini_cli_version: # optional, default is latest
 
-        push summary:
-         git add summary.txt
-         git commit -m "created a new summary file for sql code that was recently pushed"
-         git push origin main
+       - name: push summary
+         run:
+          git add summary.txt
+          git commit -m "created a new summary file for sql code that was recently pushed"
+          git push origin main
        
        
        
