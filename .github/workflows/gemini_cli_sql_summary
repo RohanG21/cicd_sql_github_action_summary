@@ -1,5 +1,5 @@
 
-name: CI_gemini_sql_summary
+name: gemini_cli_sql_summary
 
 # Controls when the workflow will run
 on:
