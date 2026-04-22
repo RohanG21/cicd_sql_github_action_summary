@@ -43,14 +43,14 @@ jobs:
         uses: google-github-actions/run-gemini-cli@v0.1.3
         with:
           prompt: | 
-          You are a Senior Data Engineer. Summarize the following SQL changes. Focus on table schema updates, new indexes, or logic changes in stored procedures,Put what you wrote in standard output.  >  "sql_file_summary.txt"
-           Code Diff: 
+            You are a Senior Data Engineer. Summarize the following SQL changes. Focus on table schema updates, new indexes, or logic changes in stored procedures,Put what you wrote in standard output.  >  "sql_file_summary.txt"
+            Code Diff: 
             ${{steps.diff.outputs.sql_diff}}
-       - name: push summary
-         run: |
-           git add summary.txt
-           git commit -m "created a new summary file for sql code that was recently pushed"
-           git push origin main
+      - name: push summary
+        run: |
+          git add summary.txt
+          git commit -m "created a new summary file for sql code that was recently pushed"
+          git push origin main
        
        
        
