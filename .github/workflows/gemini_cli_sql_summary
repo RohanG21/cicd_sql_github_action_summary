@@ -11,7 +11,8 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+permissions:
+  contents: write
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
@@ -25,32 +26,37 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-      - name: compare
+      - name: get SQL diff
         id: diff
         run: | 
-          DIFF=$(git diff HEAD^ HEAD -- '**.sql') 
+          git diff HEAD~1 HEAD -- '*.sql' > diff.sql || echo "" > diff.sql
           {
            echo "sql_diff<<EOF"
-           echo "$DIFF"
+           cat diff.sql
            echo "EOF"
           } >> "$GITHUB_OUTPUT"
       - name: run Gemini CLI
-        # You may pin to the exact commit or the version.
-        # uses: google-github-actions/run-gemini-cli@68d5a6d2e31ff01029205c58c6bf81cb3d72910b
+        id: gemini 
         uses: google-github-actions/run-gemini-cli@v0.1.3
         with:
           prompt: | 
-            You are a Senior Data Engineer. Summarize the following SQL changes. Focus on table schema updates, new indexes, or logic changes in stored procedures,Put what you wrote in standard output.  >  "sql_file_summary.txt"
+            You are a Senior Data Engineer. Summarize the following SQL changes. Focus on table schema updates, new indexes, or logic changes
+
             Code Diff: 
             ${{steps.diff.outputs.sql_diff}}
-      - name: push summary
+      - name: save summary
+        run: | 
+           echo "${{ steps.gemini.outputs.response }}" > sql_file_summary.txt
+
+      - name: configure git 
+        run: | 
+          git config user.name "RohanG21"
+          git config user.email "rohanng2020@gmail.com"
+      - name: push summary 
         run: |
-          git add summary.txt
+          git add sql_file_summary.txt
           git commit -m "created a new summary file for sql code that was recently pushed"
-          git push origin main
+          git push 
        
        
        
