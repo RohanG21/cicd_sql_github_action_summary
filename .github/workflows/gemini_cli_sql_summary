@@ -48,10 +48,9 @@ jobs:
         # A string passed to the Gemini CLI's [`--prompt` argument](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md#command-line-arguments).
           prompt: | 
            You are a Senior Data Engineer. Summarize the following SQL changes. Focus on table schema updates, new indexes, or logic changes in stored procedures. Put what you wrote in standard output. " >  "sql_file_summary.txt"
-           # A JSON string written to `.gemini/settings.json` to configure the CLI's _project_ settings.
            Code Diff: 
             ${{steps.diff.outputs.sql_diff }}
-           gemini_api_key: # optional
+          
 
        - name: push summary
          run: |
